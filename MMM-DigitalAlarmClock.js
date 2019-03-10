@@ -49,7 +49,10 @@ Module.register("MMM-DigitalAlarmClock", {
 		timer: 60 * 1000,
 		fade: false,
 		fadeTimer: 60 * 1000,
-		fadeStep: 0.005
+		fadeStep: 0.005,
+		snooze: false,
+		snoozeTimer: 5,
+		snoozeTimerUnit: "minutes" // other option is seconds
 	},
 
 	requiresVersion: "2.1.0",
@@ -87,9 +90,10 @@ Module.register("MMM-DigitalAlarmClock", {
 	},
 
 	notificationReceived(notification) {
-		if (notification === "STOP_ALARM") {
+		if (notificatyon === "STOP_ALARM") {
 			this.resetAlarmClock()
-		}
+		} else if(notificatyon === "SNOOZE_ALARM") {
+			this.snoozeAlarmClock()
 	},
 
 	checkAlarm() {
@@ -118,9 +122,18 @@ Module.register("MMM-DigitalAlarmClock", {
 			if (this.config.touch && this.config.popup) {
 				MM.getModules().enumerate(module => {
 					if (module.name === "alert") {
-						module.alerts["MMM-DigitalAlarmClock"].ntf.addEventListener("click", () => {
-							this.resetAlarmClock();
-						});
+						if (this.config.snooze || this.next.snooze) {
+							module.alerts["MMM-DigitalAlarmClock"].ntf.addEventListener("click", () => {
+								this.snoozeAlarmClock();
+							});
+							module.alerts["MMM-DigitalAlarmClock"].ntf.addEventListener("dblclick", () => {
+								this.resetAlarmClock();
+							});
+						} else {
+							module.alerts["MMM-DigitalAlarmClock"].ntf.addEventListener("click", () => {
+								this.resetAlarmClock();
+							});
+						}
 					}
 				});
 			}
@@ -156,6 +169,28 @@ Module.register("MMM-DigitalAlarmClock", {
 				this.next.moment = temp;
 			}
 		}
+	},
+
+	snoozeAlarmClock() {
+		clearTimeout(this.timer);
+		clearTimeout(this.fadeInterval);
+		this.alarmFired = false;
+		if (this.config.touch && this.config.popup) {
+			this.sendNotification("HIDE_ALERT");
+		}
+		if (this.next.snoozeTimerUnit) {
+			snoozeTimerUnit = this.next.snoozeTimerUnit;
+		} else {
+			snoozeTimerUnit = this.config.snoozeTimerUnit;
+		}
+		if (this.next.snoozeTimer) {
+			this.next.moment.add(this.next.snoozeTimer,snoozeTimerUnit);
+		} else if (this.config.snoozeTimer) {
+			this.next.moment.add(this.config.snoozeTimer,snoozeTimerUnit);
+		} else {
+			this.setNextAlarm();
+		}
+		this.updateDom(300);
 	},
 
 	resetAlarmClock() {
