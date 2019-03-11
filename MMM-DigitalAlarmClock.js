@@ -100,7 +100,7 @@ Module.register("MMM-DigitalAlarmClock", {
 	checkAlarm() {
 		if (!this.alarmFired && this.next && moment().diff(this.next.moment) >= 0) {
 			var alert = {
-				imageFA: "bell-o@fa",
+				imageFA: "bell-o",
 				title: this.next.sender || this.next.title,
 				message: this.next.message
 			};
@@ -300,6 +300,7 @@ Module.register("MMM-DigitalAlarmClock", {
 			if(b.src.indexOf("on.png") > 0) {
 				b.src = "modules/" + this.name + "/off.png";
 				this.config.alarmSet = false;
+				this.resetAlarmClock();
 			}
 			else {
 				b.src = "modules/"+this.name+"/on.png";
