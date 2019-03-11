@@ -90,10 +90,11 @@ Module.register("MMM-DigitalAlarmClock", {
 	},
 
 	notificationReceived(notification) {
-		if (notificatyon === "STOP_ALARM") {
+		if (notification === "STOP_ALARM") {
 			this.resetAlarmClock()
-		} else if(notificatyon === "SNOOZE_ALARM") {
+		} else if(notification === "SNOOZE_ALARM") {
 			this.snoozeAlarmClock()
+		}
 	},
 
 	checkAlarm() {
